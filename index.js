@@ -51,13 +51,15 @@ clearallbtn.addEventListener("click",(e)=>{
     localStorage.clear();
     location.reload();
 })
+
 function displayList(){
     todoevent.forEach(item=>{
-addtodo(item.nameevent,item.whenevent,item.timeposted,item.id,item.done,item.trash);
+addtodo(item.nameevent,item.timeposted,item.whenevent,item.countdown,
+    item.id,item.done,item.trash);
     })
 }
 
- function addtodo(todo,time,dday,ctdwn,id,done,trash){
+ function addtodo(todo,time,dday,ctwdn,id,done,trash){
 if (trash) {
     return;
 }
@@ -78,8 +80,8 @@ const html = `
     <h3 class="text ${LINE}">${dday}</h3>
         </td>
         <td class="countdown">
-    <h3>${ctdwn}</h3>
-        </td>
+        <h3>${ctwdn}</h3>
+            </td>
         <td class="trash">
         <i class="fa fa-trash-o de" id=${id} job="delete"></i>
         </td>
@@ -92,6 +94,7 @@ tabletodo.insertAdjacentHTML(position,html);
 
 let todovalue;
 let eventdate;
+let countdown;
 //add eventlistener
 document.addEventListener("keyup",(e)=>{
     e.preventDefault();
@@ -99,8 +102,9 @@ document.addEventListener("keyup",(e)=>{
       todovalue = todo.value;
       eventdate = timeevent.value.split("-").join(" ");
       countdown = getCountdown();
+      console.log(countdown);
   if (todovalue && eventdate) {
-      addtodo(todovalue,timeposted,eventdate,countdown,id,false,false)
+      addtodo(todovalue,timeposted,eventdate,countdown,id,false,false);
       todoevent.push({
           nameevent:todovalue,
           timeposted:timeposted,
@@ -117,32 +121,39 @@ id++
 //add to localstorage
 localStorage.setItem("Todo list",JSON.stringify(todoevent))
 }
-getCountdown();
+
 });
-
-function getCountdown(){
-    const trial = eventdate;
-    const newDate  = new Date(trial);
-    let totalSeconds = (newDate - current_time) / 1000 ;
-     //console.log(totalSeconds);
-     //we divide the entire seconds by 3600s which is the seconds per hour
-     let days = Math.floor(totalSeconds / 3600/24);
-     let hours = Math.floor(totalSeconds / 3600 %24);
-     let minutes = Math.floor(totalSeconds /60) %60;
-     let seconds = Math.floor(totalSeconds) %60;
-     console.log(days,hours,minutes,seconds);
-    //  ctdown.innerHTML = `${days} ${hours} ${minutes} ${seconds}`;
-     return `${days} ${hours} ${minutes} ${seconds}`
-}
-
-// setInterval(() => {
+setInterval(() => {
+    getCountdown();
+}, 1000);
+// const intervalTime = setInterval(() => {
 //     getCountdown();
 // }, 1000);
+//get the time diffrence
+const  getCountdown = ()=>{
+const newDate = new Date();
+const newEventDate = new Date(eventdate);
+const totalseconds = Math.floor((newEventDate - newDate) / 1000);
+const days =  Math.floor(totalseconds/3600/24);
+const hours = Math.floor(totalseconds/3600)%24;
+const minutes = Math.floor(totalseconds/60)%60;
+const seconds = Math.floor(totalseconds)%60;
+const data = JSON.parse(localStorage.getItem("Todo list"));
+const timetoevent = `Days:${days},Hrs:${hours},Min:${minutes} Sec ${seconds}`;
+// console.log(data.countdown);
+return timetoevent;
+}
+
 //create a function to do the check ,uncheck and line trhough
 const completeTodo = (ele)=>{
 ele.classList.toggle(CHECK);
 ele.classList.toggle(UNCHECK);
-document.querySelectorAll(".text").classList.toggle(LINE_THROUGH);
+const getallitems = document.querySelectorAll(".text");
+getallitems.forEach(item=>{
+    console.log(item);
+    item.classList.toggle(LINE_THROUGH);
+})
+
 //change in both cases on changing
 todoevent[ele.id].done = todoevent[ele.id].done ? false:true;
 }
@@ -156,7 +167,7 @@ const removelist = (ele)=>{
 
 //click event function
 tabletodo.addEventListener("click",(e)=>{
-    let element = e.target;
+    let element = e.target; 
     console.log(element.attributes);
      const elementJOB = element.attributes.job.value;
      console.log(elementJOB);
@@ -167,7 +178,7 @@ tabletodo.addEventListener("click",(e)=>{
          removelist(element);
      }
      //set localstorage
-     localStorage.setItem("Todo list",JSON.stringify(todoevent))
+     localStorage.setItem("Todo list",JSON.stringify(todoevent));
 })
-console.log(todoevent)
+
  
